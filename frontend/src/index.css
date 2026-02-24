@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #1e293b; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-6 shadow-lg;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl
+           transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-surface-card
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-border hover:bg-slate-600 text-slate-200 font-medium px-4 py-2 rounded-xl
+           transition-all duration-200 focus:outline-none;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-500 text-white font-medium px-3 py-1.5 rounded-lg
+           transition-all duration-200 text-sm;
+  }
+
+  .input {
+    @apply w-full bg-surface border border-surface-border rounded-xl px-4 py-2.5 text-slate-100
+           placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-400 mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-idea   { @apply badge bg-slate-700 text-slate-300; }
+  .badge-active { @apply badge bg-brand-600/30 text-brand-400; }
+  .badge-done   { @apply badge bg-emerald-600/30 text-emerald-400; }
+  .badge-todo   { @apply badge bg-slate-700 text-slate-300; }
+  .badge-doing  { @apply badge bg-amber-600/30 text-amber-400; }
+
+  .badge-low    { @apply badge bg-slate-700 text-slate-400; }
+  .badge-medium { @apply badge bg-amber-600/30 text-amber-400; }
+  .badge-high   { @apply badge bg-red-600/30 text-red-400; }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+  }
+
+  .modal-box {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-6 w-full max-w-lg shadow-2xl;
+  }
+}
