@@ -30,10 +30,19 @@ public class JwtService {
      * Subject = email (the Spring Security principal).
      */
     public String generateToken(UserDetails userDetails) {
+        return buildToken(userDetails, expirationMs);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        long refreshExpirationMs = 7 * 24 * 60 * 60 * 1000L; // 7 days
+        return buildToken(userDetails, refreshExpirationMs);
+    }
+
+    private String buildToken(UserDetails userDetails, long expiration) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }

@@ -65,11 +65,13 @@ class AuthServiceTest {
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$hashed");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtService.generateToken(any())).thenReturn("mocked.jwt.token");
+        when(jwtService.generateRefreshToken(any())).thenReturn("mocked.refresh.token");
 
         AuthResponse response = authService.register(registerRequest);
 
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isEqualTo("mocked.jwt.token");
+        assertThat(response.getRefreshToken()).isEqualTo("mocked.refresh.token");
         assertThat(response.getType()).isEqualTo("Bearer");
         assertThat(response.getEmail()).isEqualTo("alberto@example.com");
         verify(userRepository).save(any(User.class));
@@ -108,6 +110,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("alberto@example.com")).thenReturn(Optional.of(savedUser));
         when(passwordEncoder.matches("Secur3Pass!", "$2a$hashed")).thenReturn(true);
         when(jwtService.generateToken(any())).thenReturn("mocked.jwt.token");
+        when(jwtService.generateRefreshToken(any())).thenReturn("mocked.refresh.token");
 
         AuthResponse response = authService.login(loginRequest);
 

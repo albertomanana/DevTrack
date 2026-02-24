@@ -23,10 +23,36 @@ api.interceptors.request.use((config) => {
 // ── Response interceptor — handle 401 globally ───────────────────────────────
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Token expired or invalid — clear and redirect to login
+    async (error) => {
+        const originalRequest = error.config
+
+        // If 401 and it's not a retry or auth endpoint itself
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/')) {
+            originalRequest._retry = true
+
+            const refreshToken = localStorage.getItem('devtrack_refresh_token')
+            if (refreshToken) {
+                try {
+                    // Try to get a new token pair
+                    const res = await axios.post('/api/auth/refresh', { refreshToken })
+                    const { token, refreshToken: newRefresh } = res.data
+
+                    // Save new tokens
+                    localStorage.setItem('devtrack_token', token)
+                    localStorage.setItem('devtrack_refresh_token', newRefresh)
+
+                    // Update header and retry original request
+                    originalRequest.headers.Authorization = `Bearer ${token}`
+                    return api(originalRequest)
+                } catch (refreshError) {
+                    // Refresh token is expired/invalid too -> enforce logout
+                    console.error("Refresh token invalid", refreshError)
+                }
+            }
+
+            // Clean up and logout if we arrive here
             localStorage.removeItem('devtrack_token')
+            localStorage.removeItem('devtrack_refresh_token')
             localStorage.removeItem('devtrack_user')
             window.location.href = '/login'
         }
@@ -40,6 +66,7 @@ export default api
 export const authApi = {
     register: (data) => api.post('/auth/register', data),
     login: (data) => api.post('/auth/login', data),
+    refresh: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
 }
 
 // ── Projects ──────────────────────────────────────────────────────────────────

@@ -11,14 +11,16 @@ export function AuthProvider({ children }) {
     })
 
     const login = useCallback((authResponse) => {
-        const { token, ...userInfo } = authResponse
+        const { token, refreshToken, ...userInfo } = authResponse
         localStorage.setItem('devtrack_token', token)
+        if (refreshToken) localStorage.setItem('devtrack_refresh_token', refreshToken)
         localStorage.setItem('devtrack_user', JSON.stringify(userInfo))
         setUser(userInfo)
     }, [])
 
     const logout = useCallback(() => {
         localStorage.removeItem('devtrack_token')
+        localStorage.removeItem('devtrack_refresh_token')
         localStorage.removeItem('devtrack_user')
         setUser(null)
     }, [])

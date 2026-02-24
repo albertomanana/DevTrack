@@ -43,7 +43,8 @@ public class AuthService {
         log.info("New user registered: id={}, username={}", user.getId(), user.getDisplayUsername());
 
         String token = jwtService.generateToken(user);
-        return AuthResponse.of(token, user.getId(), user.getDisplayUsername(), user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return AuthResponse.of(token, refreshToken, user.getId(), user.getDisplayUsername(), user.getEmail());
     }
 
     /**
@@ -62,6 +63,33 @@ public class AuthService {
 
         log.info("User logged in: id={}, username={}", user.getId(), user.getDisplayUsername());
         String token = jwtService.generateToken(user);
-        return AuthResponse.of(token, user.getId(), user.getDisplayUsername(), user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return AuthResponse.of(token, refreshToken, user.getId(), user.getDisplayUsername(), user.getEmail());
+    }
+
+    /**
+     * Refresh access token.
+     * Throws {@link BadCredentialsException} if token is invalid or user not found.
+     */
+    @Transactional(readOnly = true)
+    public AuthResponse refresh(String refreshToken) {
+        String username = jwtService.extractSubject(refreshToken);
+        if (username == null) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        log.info("Token refreshed for user: {}", user.getDisplayUsername());
+        String newToken = jwtService.generateToken(user);
+
+        // We can either reuse the same refresh token or generate a new one.
+        // For security rotation is better, but keeping simpler here for MVP.
+        return AuthResponse.of(newToken, refreshToken, user.getId(), user.getDisplayUsername(), user.getEmail());
     }
 }
